@@ -118,15 +118,15 @@ def customer_transactions(customer_id, treeview):
     try:
         cursor.execute("""
             SELECT t.trans_id, t.trans_date, t.item_total, t.total_amount,
-                    e.first_name || ' ' || e.last_name AS employee_name
+                    GROUP_CONCAT(pi.product_id, ', ') AS product_ids
             FROM transactions t
-            LEFT JOIN employees e ON t.employee_id = e.employee_id
+            LEFT JOIN purchase_items pi ON t.trans_id = pi.trans_id
             WHERE t.customer_id = ?
             ORDER BY t.trans_date DESC
         """, (customer_id,))
         rows = cursor.fetchall()
         treeview.delete(*treeview.get_children())
-        tree["columns"] = ("Transaction ID", "Date", "Item Total", "Total Amount", "Employees")
+        tree["columns"] = ("Transaction ID", "Date", "Item Total", "Total Amount", "Product IDs")
         for col in tree["columns"]:
             tree.heading(col, text=col)
         if not rows:
@@ -166,6 +166,22 @@ def products_purchased(customer_id, treeview):
     except Exception as e:
         messagebox.showerror("Error", f"Failed to fetch products:str{e}")
 
+def high_spenders():
+    clear_tree()
+    cursor.execute("""
+                   SELECT first_name, last_name, email FROM customers
+                   WHERE customer_id IN (
+                        SELECT customer_id FROM transactions
+                        GROUP BY customer_id
+                        HAVING SUM(total_amount) > 50)
+                   """)
+    rows = cursor.fetchall()
+    tree["columns"] = ("First", "Last", "Email")
+    for col in tree["columns"]:
+        tree.heading(col, text=col)
+    for r in rows:
+        tree.insert("", tk.END, values=r)
+    
 # input fields
 frame = tk.Frame(root)
 frame.pack(pady=10)
@@ -216,5 +232,6 @@ query_frame.pack(pady=10)
 
 tk.Button(query_frame, text="Customer's Transactions", command=lambda: customer_transactions(entry_customer_id.get(), tree)).grid(row=0, column=0, padx=5)
 tk.Button(query_frame, text="Products Purchased", command=lambda: products_purchased(entry_customer_id.get(), tree)).grid(row=0, column=1, padx=5)
+tk.Button(query_frame, text="High Spenders", command=high_spenders).grid(row=0, column=2, padx=5)
 
 root.mainloop()
