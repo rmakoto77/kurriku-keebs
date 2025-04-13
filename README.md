@@ -24,3 +24,9 @@ files:
 - 'crud.sql' (Performs CRUD operations)
 - 'kurriku_keebs.db' (database)
 - 'README.md'
+
+How to run:
+- clone the repo
+- git clone https://github.com/rmakoto77/kurriku-keebs.git
+- cd kurriku-keebs
+- (run the GUI) python app.py
