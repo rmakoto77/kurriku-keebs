@@ -68,6 +68,43 @@ def add_product():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
+def update_product():
+    selected = tree.focus()
+    if not selected:
+        messagebox.showwarning("No selection")
+        return
+    values = tree.item(selected, "values")
+    print("values:", values)
+    try:
+        product_id = int(values[0])
+        name = entry_name.get()
+        category = entry_cat.get()
+        price = float(entry_price.get())
+        print(f"updating to: {product_id}, {name}, {category}, {price}")
+
+        cursor.execute("UPDATE Products SET name = ?, category = ?, price = ? WHERE product_id = ?",
+                       (name, category, price, product_id))
+        conn.commit()
+        load_products()
+        messagebox.showinfo("Success")
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+def delete_product():
+    selected = tree.focus()
+    if not selected:
+        messagebox.showwarning("No selection")
+        return
+    values = tree.item(selected, "values")
+    try:
+        product_id = values[0]
+        cursor.execute("DELETE FROM Products WHERE product_id = ?", (int(product_id),))
+        conn.commit()
+        load_products()
+        messagebox.showinfo("Success")
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
 # input fields
 frame = tk.Frame(root)
 frame.pack(pady=10)
@@ -102,6 +139,8 @@ btn_frame.pack(pady=10)
 
 tk.Button(btn_frame, text="Load Products", command=load_products).grid(row=0, column=0, padx=5)
 tk.Button(btn_frame, text="Add Product", command=add_product).grid(row=0, column=1, padx=5)
+tk.Button(btn_frame, text="Update Product", command=update_product).grid(row=0, column=2, padx=5)
+tk.Button(btn_frame, text="Delete Product", command=delete_product).grid(row=0, column=3, padx=5)
 
 tk.Button(btn_frame, text="Load Customers", command=load_customers).grid(row=1, column=0, padx=5)
 tk.Button(btn_frame, text="Add Customer", command=add_customer).grid(row=1, column=1, padx=5)
