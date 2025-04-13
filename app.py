@@ -24,8 +24,13 @@ root=tk.Tk()
 root.title("Kurriku Keebs Admin")
 root.geometry("1000x600")
 
-tree=ttk.Treeview(root)
-tree.pack()
+tree_frame = tk.Frame(root)
+tree_frame.pack(fill="both", expand=True, padx=10, pady=10)
+tree_scroll = tk.Scrollbar(tree_frame)
+tree_scroll.pack(side="right", fill="y")
+tree = ttk.Treeview(tree_frame, yscrollcommand=tree_scroll.set, show="headings")
+tree.pack(fill="both", expand=True)
+tree_scroll.config(command=tree.yview)
 
 def clear_tree():
     for i in tree.get_children():
@@ -38,6 +43,7 @@ def load_customers():
     tree["columns"] = ("ID", "First", "Last", "email")
     for col in tree["columns"]:
         tree.heading(col, text=col)
+        tree.column(col, anchor="center", width=120)
     for r in rows:
         tree.insert("", tk.END, values=r)
 
@@ -57,6 +63,7 @@ def load_products():
     tree["columns"] = ("ID", "Name", "Category", "Price")
     for col in tree["columns"]:
         tree.heading(col, text=col)
+        tree.column(col, anchor="center", width=120)
     for r in rows:
         tree.insert("", tk.END, values=r)
 
@@ -129,6 +136,7 @@ def customer_transactions(customer_id, treeview):
         tree["columns"] = ("Transaction ID", "Date", "Item Total", "Total Amount", "Product IDs")
         for col in tree["columns"]:
             tree.heading(col, text=col)
+            tree.column(col, anchor="center", width=120)
         if not rows:
             messagebox.showinfo("No Transactions", f"None found for customer ID {customer_id}")
         for r in rows:
@@ -159,6 +167,7 @@ def products_purchased(customer_id, treeview):
         tree["columns"] = ("Product Name", "Category", "Sale Price", "Date Purchased")
         for col in tree["columns"]:
             tree.heading(col, text=col)
+            tree.column(col, anchor="center", width=120)
         if not rows:
             messagebox.showinfo("No Products", f"None found for customer ID {customer_id}")
         for r in rows:
@@ -179,6 +188,7 @@ def high_spenders():
     tree["columns"] = ("First", "Last", "Email")
     for col in tree["columns"]:
         tree.heading(col, text=col)
+        tree.column(col, anchor="center", width=120)
     for r in rows:
         tree.insert("", tk.END, values=r)
     
