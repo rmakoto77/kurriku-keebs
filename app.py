@@ -136,6 +136,36 @@ def customer_transactions(customer_id, treeview):
     except Exception as e:
         messagebox.showerror("Error", f"Failed to fetch transactions:str{e}")
 
+def products_purchased(customer_id, treeview):
+    if not customer_id.isdigit():
+        messagebox.showerror("Invalid input")
+        return
+    customer_id = int(customer_id)
+    
+    try:
+        cursor.execute("""
+            SELECT p.name AS product_name,
+            p.category,
+            pi.sale_price,
+            t.trans_date
+            FROM transactions t
+            JOIN purchase_items pi ON t.trans_id = pi.trans_id
+            JOIN products p ON pi.product_id = p.product_id
+            WHERE t.customer_id = ?
+            ORDER BY t.trans_date DESC
+        """, (customer_id,))
+        rows = cursor.fetchall()
+        treeview.delete(*treeview.get_children())
+        tree["columns"] = ("Product Name", "Category", "Sale Price", "Date Purchased")
+        for col in tree["columns"]:
+            tree.heading(col, text=col)
+        if not rows:
+            messagebox.showinfo("No Products", f"None found for customer ID {customer_id}")
+        for r in rows:
+            treeview.insert("", tk.END, values=r)
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to fetch products:str{e}")
+
 # input fields
 frame = tk.Frame(root)
 frame.pack(pady=10)
@@ -185,5 +215,6 @@ query_frame = tk.Frame(root)
 query_frame.pack(pady=10)
 
 tk.Button(query_frame, text="Customer's Transactions", command=lambda: customer_transactions(entry_customer_id.get(), tree)).grid(row=0, column=0, padx=5)
+tk.Button(query_frame, text="Products Purchased", command=lambda: products_purchased(entry_customer_id.get(), tree)).grid(row=0, column=1, padx=5)
 
 root.mainloop()
