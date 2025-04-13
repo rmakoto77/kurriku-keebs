@@ -5,7 +5,11 @@
             - load_products()
             - add_product()
             - update_product() --> update products table
-            - delete_product()   
+            - delete_product()
+            
+        - Buttons to run JOIN queries
+            - join transactions and customers --> see how many transactions a customer has w us
+            - join transactions, purchase_items, and customers --> pull previous products a customer bought  
 '''
 
 import sqlite3
@@ -105,6 +109,33 @@ def delete_product():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
+def customer_transactions(customer_id, treeview):
+    if not customer_id.isdigit():
+        messagebox.showerror("Invalid input")
+        return
+    customer_id = int(customer_id)
+     
+    try:
+        cursor.execute("""
+            SELECT t.trans_id, t.trans_date, t.item_total, t.total_amount,
+                    e.first_name || ' ' || e.last_name AS employee_name
+            FROM transactions t
+            LEFT JOIN employees e ON t.employee_id = e.employee_id
+            WHERE t.customer_id = ?
+            ORDER BY t.trans_date DESC
+        """, (customer_id,))
+        rows = cursor.fetchall()
+        treeview.delete(*treeview.get_children())
+        tree["columns"] = ("Transaction ID", "Date", "Item Total", "Total Amount", "Employees")
+        for col in tree["columns"]:
+            tree.heading(col, text=col)
+        if not rows:
+            messagebox.showinfo("No Transactions", f"None found for customer ID {customer_id}")
+        for r in rows:
+            treeview.insert("", tk.END, values=r)
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to fetch transactions:str{e}")
+
 # input fields
 frame = tk.Frame(root)
 frame.pack(pady=10)
@@ -133,6 +164,10 @@ tk.Label(frame, text="Email").grid(row=1, column=4)
 entry_email = tk.Entry(frame)
 entry_email.grid(row=1, column=5)
 
+tk.Label(frame, text="Customer ID").grid(row=2, column=0)
+entry_customer_id = tk.Entry(frame)
+entry_customer_id.grid(row=2, column=1)
+
 # buttons
 btn_frame = tk.Frame(root)
 btn_frame.pack(pady=10)
@@ -144,5 +179,11 @@ tk.Button(btn_frame, text="Delete Product", command=delete_product).grid(row=0, 
 
 tk.Button(btn_frame, text="Load Customers", command=load_customers).grid(row=1, column=0, padx=5)
 tk.Button(btn_frame, text="Add Customer", command=add_customer).grid(row=1, column=1, padx=5)
+
+# SQL buttons
+query_frame = tk.Frame(root)
+query_frame.pack(pady=10)
+
+tk.Button(query_frame, text="Customer's Transactions", command=lambda: customer_transactions(entry_customer_id.get(), tree)).grid(row=0, column=0, padx=5)
 
 root.mainloop()
