@@ -15,21 +15,12 @@ Schema:
 Predefined reports: (predifined SQL queries)
 - Display transactions and their info. for a selected customer (JOIN transactions and employees for name)
 - Display products previously purchased by customer (JOIN purchased_products and products)
+- High spending customers (HAVING(total) > 50)
 
 files:
 - 'app.py' (Python GUI using Tkinter)
 - 'create.sql' (Creates tables with constraints)
 - 'insert.sql' (Inserts data into tables)
 - 'crud.sql' (Performs CRUD operations)
+- 'kurriku_keebs.db' (database)
 - 'README.md'
-
----------
-
-How to run:
-
-clone repo
-git clone https://github.com/rmakoto77/kurriku-keebs
-cd project1
-
-run GUI
-python app.py
