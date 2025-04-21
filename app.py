@@ -154,7 +154,7 @@ def products_purchased(customer_id, treeview):
         cursor.execute("""
             SELECT p.name AS product_name,
             p.category,
-            pi.sale_price,
+            p.price,
             t.trans_date
             FROM transactions t
             JOIN purchase_items pi ON t.trans_id = pi.trans_id
